@@ -140,6 +140,8 @@ protected:
           std::vector<LayerFE*> &outLayerFEs) override;
     void appendRegionFlashRequests(const Region&, std::vector<LayerFE::LayerSettings>&) override;
     void setExpensiveRenderingExpected(bool enabled) override;
+    void setHintSessionGpuFence(std::unique_ptr<FenceTime>&& gpuFence) override;
+    bool isPowerHintSessionEnabled() override;
     void dumpBase(std::string&) const;
 
     // Implemented by the final implementation for the final state it uses.
@@ -149,6 +151,8 @@ protected:
     virtual void finalizePendingOutputLayers() = 0;
     virtual const compositionengine::CompositionEngine& getCompositionEngine() const = 0;
     virtual void dumpState(std::string& out) const = 0;
+
+    bool mustRecompose() const;
 
 private:
     void dirtyEntireOutput();
@@ -168,6 +172,9 @@ private:
     std::unique_ptr<ClientCompositionRequestCache> mClientCompositionRequestCache;
     std::unique_ptr<planner::Planner> mPlanner;
     std::unique_ptr<HwcAsyncWorker> mHwComposerAsyncWorker;
+
+    // Whether the content must be recomposed this frame.
+    bool mMustRecompose = false;
 };
 
 // This template factory function standardizes the implementation details of the
